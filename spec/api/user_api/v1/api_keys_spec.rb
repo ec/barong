@@ -59,7 +59,7 @@ describe 'Api::V1::APIKeys' do
     let(:expected_fields) do
       {
         uid: api_key.uid,
-        public_key: api_key.public_key,
+        kid: api_key.kid,
         state: api_key.state,
         scopes: %w[trade]
       }
@@ -105,13 +105,13 @@ describe 'Api::V1::APIKeys' do
       let(:params) do
         {
           scopes: 'trade',
-          public_key: Faker::Crypto.sha256
+          kid: Faker::Crypto.sha256
         }
       end
       let(:expected_fields) do
         {
           uid: instance_of(String),
-          public_key: params[:public_key],
+          kid: params[:kid],
           state: 'active',
           scopes: params[:scopes].split(','),
           expires_in: 1.day.to_i
@@ -156,7 +156,7 @@ describe 'Api::V1::APIKeys' do
     context 'when expires in is greater than allowed' do
       let(:params) do
         {
-          public_key: Faker::Crypto.sha256,
+          kid: Faker::Crypto.sha256,
           expires_in: 1.day.to_i + 1
         }
       end
@@ -178,14 +178,14 @@ describe 'Api::V1::APIKeys' do
     context 'when valid fields' do
       let(:params) do
         {
-          public_key: Faker::Crypto.sha256,
+          kid: Faker::Crypto.sha256,
           expires_in: 1.hour.to_i,
           state: 'inactive'
         }
       end
 
       it 'Updates an api key' do
-        expect { do_request }.to change { api_key.reload.public_key }.to(params[:public_key])
+        expect { do_request }.to change { api_key.reload.kid }.to(params[:kid])
         expect(response.status).to eq(200)
       end
 

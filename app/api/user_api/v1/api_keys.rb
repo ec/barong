@@ -4,15 +4,28 @@ module UserApi
   module V1
     # Responsible for CRUD for api keys
     class APIKeys < Grape::API
+      helpers do
+        def check_algo(params)
+          if params[:algorithm].include?('HS')
+            SecureRandom.hex(16)
+          elsif params[:algorithm].include?('RS') && params[:kid]
+            params[:kid]
+          else
+            ## TODO raise better error
+            error!('Unsupported or invalid algorithm')
+          end
+        end
+      end
+
       resource :api_keys do
         before do
-          unless current_account.otp_enabled
-            error!('Only accounts with enabled 2FA alowed', 400)
-          end
+          # unless current_account.otp_enabled
+          #   error!('Only accounts with enabled 2FA alowed', 400)
+          # end
 
-          unless Vault::TOTP.validate?(current_account.uid, params[:totp_code])
-            error!('OTP code is invalid', 422)
-          end
+          # unless Vault::TOTP.validate?(current_account.uid, params[:totp_code])
+          #   error!('OTP code is invalid', 422)
+          # end
         end
 
         desc 'List all api keys for current account.',
@@ -44,6 +57,8 @@ module UserApi
           present api_key, with: Entities::APIKey
         end
 
+
+
         desc 'Create an api key',
              security: [{ "BearerToken": [] }],
              failure: [
@@ -52,20 +67,25 @@ module UserApi
                { code: 422, message: 'Validation errors' }
              ]
         params do
-          requires :public_key, type: String,
+          requires :algorithm, type: String,
+                                allow_blank: false
+          optional :kid, type: String,
                                 allow_blank: false
           optional :scopes, type: String,
                             allow_blank: false,
                             desc: 'comma separated scopes'
-          optional :expires_in, type: String,
-                                allow_blank: false,
-                                desc: 'expires_in duration in seconds'
-          requires :totp_code, type: String, desc: 'Code from Google Authenticator', allow_blank: false
+          # requires :totp_code, type: String, desc: 'Code from Google Authenticator', allow_blank: false
         end
         post do
+          ## REFACTORING TODO
+          ## Rewrite check_algo to use hmac? method
+          params[:kid] = check_algo(params)
           declared_params = declared(params, include_missing: false)
                             .except(:totp_code)
-                            .merge(scopes: params[:scopes]&.split(','))
+                            .merge(scopes: params[:scopes]&.split(','))                            
+          ## For now we can WRITE secret_key TO VAULT if declared_params[:kid].length == 16
+          ## Will be changed after refactoring to hmac? method
+          ## secret_key should be also SecureRandom.hex(16) or SecureRandom.hex(24)
           api_key = current_account.api_keys.create(declared_params)
           if api_key.errors.any?
             error!(api_key.errors.full_messages.to_sentence, 422)
@@ -84,14 +104,11 @@ module UserApi
              ]
         params do
           requires :uid, type: String, allow_blank: false
-          optional :public_key, type: String,
+          optional :kid, type: String,
                                 allow_blank: false
           optional :scopes, type: String,
                             allow_blank: false,
                             desc: 'comma separated scopes'
-          optional :expires_in, type: String,
-                                allow_blank: false,
-                                desc: 'expires_in duration in seconds'
           optional :state, type: String, desc: 'State of API Key. "active" state means key is active and can be used for auth',
                            allow_blank: false
           requires :totp_code, type: String, desc: 'Code from Google Authenticator', allow_blank: false

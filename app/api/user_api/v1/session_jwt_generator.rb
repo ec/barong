@@ -7,13 +7,23 @@ module UserApi
     class SessionJWTGenerator
       ALGORITHM = 'RS256'
 
-      def initialize(jwt_token:, key_id:)
+      ## TODO signature?
+      def initialize(signature:, key_id:)
         @key_id = key_id
-        @jwt_token = jwt_token
+        @signature = jwt_token
         @api_key = APIKey.active.find_by!(uid: key_id)
       end
 
-      def verify_payload
+      def verify_hmac_payload
+        kid = ApiKey.find_by_key_id(params.key_id).kid
+        data = params.nonce + kid + params.key_id
+        ## GET A SECRET KEY FROM THE VAULT BY KID
+        ## Think about naming
+        true_signature = OpenSSL::HMAC.hexdigest("SHA256", "secret_key_from_vault", data).upcase
+        true_signature == params.signature
+      end
+
+      def verify_rsa_payload
         payload, = decode_payload
         payload.present?
       end
