@@ -2037,7 +2037,7 @@ Validates client jwt and generates peatio session jwt
 
 
 ```yaml
-kid: string
+key_id: string
 jwt_token: string
 
 
@@ -2050,7 +2050,7 @@ jwt_token: string
 |Parameter|In|Type|Required|Description|
 |---|---|---|---|---|
 |body|body|object|false|No description|
-|» kid|body|string|true|API Key uid|
+|» key_id|body|string|true|API Key uid|
 |» jwt_token|body|string|true|No description|
 
 

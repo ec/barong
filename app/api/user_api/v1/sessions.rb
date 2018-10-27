@@ -115,7 +115,7 @@ module UserApi
                { code: 401, message: 'JWT is invalid' }
              ]
         params do
-          requires :kid, type: String, allow_blank: false, desc: 'API Key uid'
+          requires :key_id, type: String, allow_blank: false, desc: 'API Key uid'
           requires :jwt_token, type: String, allow_blank: false
         end
         post 'generate_jwt' do

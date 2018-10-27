@@ -30,13 +30,13 @@ You need to provide valid TOTP code on api key access.
    Example:
 
    ```bash
-   curl -X POST -H 'Content-Type: application/json' -d '{"kid":"...", "jwt_token":"..."}' http://localhost:3000/api/v1/sessions/generate_jwt
+   curl -X POST -H 'Content-Type: application/json' -d '{"key_id":"...", "jwt_token":"..."}' http://localhost:3000/api/v1/sessions/generate_jwt
    ```
 
    Parameters:
 
    ```yaml
-   'kid': uid of the api_key
+   'key_id': uid of the api_key
    'jwt_token': payload with signature
    ```
 
@@ -61,6 +61,6 @@ You need to provide valid TOTP code on api key access.
    jwt_token = JWT.encode(payload, secret_key, 'RS256')
    ```
 
-3. Send this signature (as `jwt_token` parameter) to barong with the associated API key id (`kid`), Barong returns a valid JWT.
+3. Send this signature (as `jwt_token` parameter) to barong with the associated API key id (`key_id`), Barong returns a valid JWT.
 
 4. Use the JWT to access to peatio API. The token will be expired after `expired_in` time. After that you can generate a new JWT folloings steps from 2.

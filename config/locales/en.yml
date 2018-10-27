@@ -63,7 +63,7 @@ en:
         city: City
         country: Country
         jwt_token: JWT Token
-        kid: KID
+        key_id: KEY ID
         application_id: Application ID
         code: Code
         otp_code: OTP code

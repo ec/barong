@@ -7,10 +7,10 @@ module UserApi
     class SessionJWTGenerator
       ALGORITHM = 'RS256'
 
-      def initialize(jwt_token:, kid:)
-        @kid = kid
+      def initialize(jwt_token:, key_id:)
+        @key_id = key_id
         @jwt_token = jwt_token
-        @api_key = APIKey.active.find_by!(uid: kid)
+        @api_key = APIKey.active.find_by!(uid: key_id)
       end
 
       def verify_payload
@@ -32,7 +32,7 @@ module UserApi
           role:  account.role,
           level: account.level,
           state: account.state,
-          api_kid: @api_key.uid
+          api_key_id: @api_key.key_id
         }
 
         JWT.encode(payload, Barong::Security.private_key, ALGORITHM)

@@ -308,14 +308,14 @@ describe 'Session create test' do
       it 'renders an error' do
         do_request
         expect_status.to eq 400
-        expect_body.to eq(error: 'KID is missing, KID is empty, JWT Token is missing, JWT Token is empty')
+        expect_body.to eq(error: 'KEY_ID is missing, KEY_ID is empty, JWT Token is missing, JWT Token is empty')
       end
     end
 
     context 'when key is not found' do
       let(:params) do
         {
-          kid: 'invalid',
+          key_id: 'invalid',
           jwt_token: 'invalid_token'
         }
       end
@@ -329,7 +329,7 @@ describe 'Session create test' do
     context 'when payload is invalid' do
       let(:params) do
         {
-          kid: api_key.uid,
+          key_id: api_key.uid,
           jwt_token: 'invalid_token'
         }
       end
@@ -349,7 +349,7 @@ describe 'Session create test' do
       end
       let(:params) do
         {
-          kid: multiple_scopes_api_key.uid,
+          key_id: multiple_scopes_api_key.uid,
           jwt_token: encode_api_key_payload({})
         }
       end
