@@ -120,14 +120,12 @@ class Profile < ApplicationRecord
     profile_label = user.labels.find_by(key: :profile)
     return unless profile_full? && profile_label.present?
 
-    profile_label.update(value: :verified)
+    profile_label.update(value: 'partial')
   end
 
   def create_profile_label
-    if profile_full?
-      user.labels.create(key: 'profile', value: 'verified', scope: 'private')
-    else
-      user.labels.create(key: 'profile', value: 'partial', scope: 'private')
-    end
+    # profile partial will be the only label available in the profile model, so
+    # we can define strict label-level dependency
+    user.labels.create(key: 'profile', value: 'partial', scope: 'private')
   end
 end
