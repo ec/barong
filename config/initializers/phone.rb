@@ -8,10 +8,10 @@ Barong::App.define do |config|
 
   config.write(:twilio_provider, TwilioSmsSendService)
 
-  config.set(:phone_verification, 'mock')
-  config.set(:twilio_phone_number, '+15005550000')
-  config.set(:twilio_account_sid, '')
-  config.set(:twilio_auth_token, '')
+  config.set(:phone_verification, 'twilio_whatsapp')
+  config.set(:twilio_phone_number, '+14155238886')
+  config.set(:twilio_account_sid, 'AC5edb5daf1f4b650f1ce0be3dfc910c73')
+  config.set(:twilio_auth_token, 'a5a446eaf410a2f541970a8709c24b6c')
   config.set(:twilio_service_sid, '')
   config.set(:sms_content_template, 'Your verification code for Barong: {{code}}')
 end
@@ -21,6 +21,12 @@ token = Barong::App.config.twilio_auth_token
 service_sid = Barong::App.config.twilio_service_sid
 
 case Barong::App.config.phone_verification
+when 'twilio_whatsapp'
+  raise 'Invalid twilio config' if sid.to_s.empty? || token.to_s.empty?
+
+  client = Twilio::REST::Client.new(sid, token)
+
+  Barong::App.write(:twilio_provider, TwilioWhatsappService)
 when 'twilio_sms'
   raise 'Invalid twilio config' if sid.to_s.empty? || token.to_s.empty?
 
